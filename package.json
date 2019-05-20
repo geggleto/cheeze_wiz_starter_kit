@@ -8,7 +8,9 @@
     "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
+    "bluebird": "^3.5.4",
     "dotenv": "^8.0.0",
+    "sqlite": "^3.0.3",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
     "vuetify": "^1.5.5",

@@ -1,6 +1,8 @@
 const fs = require('fs');
 const Web3 = require('web3');
 
+const dbPromise = require('./db.js');
+
 const env = require('dotenv').config({ path : __dirname + '/.env' });
 
 //Use Infuria Here
@@ -28,28 +30,38 @@ Contract.methods.nextWizardId().call()
       promises.push(
         Contract.methods.getWizard(x).call()
           .then(record => {
-            return processBlockchainRecord(record);
+            return processBlockchainRecord(record, x);
           })
       );
     }
 
     return Promise.all(promises);
   })
-  .then((records) => {
-      records.forEach(record => {
-        //Process Record
-        console.log(record);
-      });
+  .then(async (records) => {
+    let db = await dbPromise;
+
+    records.forEach(async (record) => {
+      //Process Record
+      let result = await db.run("INSERT INTO Wizards (tokenId, owner, affinity, power) VALUES(?,?,?,?)",[
+        record.tokenId,
+        record.owner,
+        record.affinity,
+        record.power
+      ]);
+
+    });
   });
 
 
 /**
  *
  * @param record
- * @return {{owner: *, affinity: (string|void), power: string}}
+ * @param tokenId
+ * @return {{tokenId: *, owner: *, affinity: string, power: string}}
  */
-function processBlockchainRecord(record) {
+function processBlockchainRecord(record, tokenId) {
   return {
+    tokenId : tokenId,
     owner : record.owner,
     affinity : translateAffinity(record.affinity),
     power : record.power.toString()
